@@ -23,10 +23,10 @@ const isIOS = Platform.OS === 'ios';
 let debounce;
 
 if (isIOS) {
-  debounce = function(func, wait) {
+  debounce = function (func, wait) {
     wait = wait || 0;
     let id, count;
-    let action = function(event) {
+    let action = function (event) {
       if (count) {
         count--;
         id = requestAnimationFrame(() => action.call(this, event));
@@ -34,7 +34,7 @@ if (isIOS) {
         func.call(this, event);
       }
     };
-    return function(event) {
+    return function (event) {
       event.persist();
       cancelAnimationFrame(id);
       count = wait;
@@ -42,10 +42,10 @@ if (isIOS) {
     };
   };
 } else {
-  debounce = function(func, wait) {
+  debounce = function (func, wait) {
     wait = wait || 0;
     let id, count;
-    let action = function(event) {
+    let action = function (event) {
       if (count) {
         count--;
         id = setTimeout(() => action.call(this, event));
@@ -53,7 +53,7 @@ if (isIOS) {
         func.call(this, event);
       }
     };
-    return function(event) {
+    return function (event) {
       event.persist();
       clearTimeout(id);
       count = wait;
@@ -66,14 +66,10 @@ export default class extends PureComponent {
   static propTypes = {
     topOffset: PropTypes.number,
     keyboardOffset: PropTypes.number,
-    multilineInputStyle: PropTypes.oneOfType([
-      PropTypes.object,
-      PropTypes.array,
-      PropTypes.number,
-    ]),
+    multilineInputStyle: PropTypes.oneOfType([PropTypes.object, PropTypes.array, PropTypes.number]),
     useAnimatedScrollView: PropTypes.bool,
     supportHardwareKeyboard: PropTypes.bool,
-    keyboardAvoidingViewProps: PropTypes.object
+    keyboardAvoidingViewProps: PropTypes.object,
   };
 
   static defaultProps = {
@@ -81,7 +77,7 @@ export default class extends PureComponent {
     keyboardOffset: 40,
     multilineInputStyle: null,
     useAnimatedScrollView: false,
-    keyboardAvoidingViewProps: null
+    keyboardAvoidingViewProps: null,
   };
 
   state = {
@@ -110,10 +106,13 @@ export default class extends PureComponent {
 
   render() {
     const {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       topOffset,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       keyboardOffset,
       multilineInputStyle,
       useAnimatedScrollView,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       supportHardwareKeyboard,
       keyboardAvoidingViewProps,
       children,
@@ -122,11 +121,7 @@ export default class extends PureComponent {
 
     const kavProps = Object.assign({ behavior: isIOS ? 'padding' : null }, keyboardAvoidingViewProps);
 
-    const {
-      measureInputVisible,
-      measureInputValue,
-      measureInputWidth,
-    } = this.state;
+    const { measureInputVisible, measureInputValue, measureInputWidth } = this.state;
 
     const newChildren = this._cloneDeepComponents(children);
 
@@ -135,23 +130,29 @@ export default class extends PureComponent {
     return (
       <KeyboardAvoidingView {...kavProps}>
         <View style={styles.wrap}>
-          <ScrollComponent ref={this._onRef}
-                           onFocus={this._onFocus}
-                           onBlur={this._onBlur} {...otherProps}
-                           // fix missing TextInput missing focus
-                           keyboardShouldPersistTaps='handled'>
-            <View onStartShouldSetResponderCapture={isIOS ? this._onTouchStart : null}>
+          <ScrollComponent
+            ref={this._onRef}
+            onFocus={this._onFocus}
+            onBlur={this._onBlur}
+            {...otherProps}
+            // fix missing TextInput missing focus
+            keyboardShouldPersistTaps="handled"
+          >
+            <View
+              onStartShouldSetResponderCapture={isIOS ? this._onTouchStart : null}
+              style={{ flexGrow: 1, flexShrink: 0 }}
+            >
               {newChildren}
-              <View style={styles.hidden}
-                    pointerEvents="none">
-                {
-                  measureInputVisible &&
-                  <TextInput style={[multilineInputStyle, { width: measureInputWidth }]}
-                             value={measureInputValue}
-                             onContentSizeChange={this._onContentSizeChangeMeasureInput}
-                             editable={false}
-                             multiline />
-                }
+              <View style={styles.hidden} pointerEvents="none">
+                {measureInputVisible && (
+                  <TextInput
+                    style={[multilineInputStyle, { width: measureInputWidth }]}
+                    value={measureInputValue}
+                    onContentSizeChange={this._onContentSizeChangeMeasureInput}
+                    editable={false}
+                    multiline
+                  />
+                )}
               </View>
             </View>
           </ScrollComponent>
@@ -161,8 +162,14 @@ export default class extends PureComponent {
   }
 
   _addListener() {
-    this._keyboardShowListener = Keyboard.addListener(isIOS ? 'keyboardWillShow' : 'keyboardDidShow', this._onKeyboardShow);
-    this._keyboardHideListener = Keyboard.addListener(isIOS ? 'keyboardWillHide' : 'keyboardDidHide', this._onKeyboardHide);
+    this._keyboardShowListener = Keyboard.addListener(
+      isIOS ? 'keyboardWillShow' : 'keyboardDidShow',
+      this._onKeyboardShow,
+    );
+    this._keyboardHideListener = Keyboard.addListener(
+      isIOS ? 'keyboardWillHide' : 'keyboardDidHide',
+      this._onKeyboardHide,
+    );
   }
 
   _removeListener() {
@@ -173,12 +180,9 @@ export default class extends PureComponent {
   }
 
   _extendScrollViewFunc() {
-    const funcArray = [
-      'scrollTo',
-      'scrollToEnd',
-    ];
+    const funcArray = ['scrollTo', 'scrollToEnd'];
 
-    funcArray.forEach(funcName => {
+    funcArray.forEach((funcName) => {
       this[funcName] = (...args) => {
         this._root[funcName](...args);
       };
@@ -187,7 +191,7 @@ export default class extends PureComponent {
 
   _cloneDeepComponents(Component) {
     if (Component instanceof Array) {
-      return Component.map(subComponent => this._cloneDeepComponents(subComponent));
+      return Component.map((subComponent) => this._cloneDeepComponents(subComponent));
     } else if (Component && Component.props && Component.props.children) {
       const newComponent = { ...Component };
       newComponent.props = { ...Component.props };
@@ -207,12 +211,12 @@ export default class extends PureComponent {
     const onSelectionChange = Component.props.onSelectionChange;
     const onContentSizeChange = Component.props.onContentSizeChange;
 
-    Component.props.onChange = event => {
+    Component.props.onChange = (event) => {
       this._onChange(event);
       onChange && onChange(event);
     };
 
-    Component.props.onSelectionChange = event => {
+    Component.props.onSelectionChange = (event) => {
       event.persist();
       if (isIOS) {
         // 确保处理代码在 onChange 之后执行
@@ -221,8 +225,7 @@ export default class extends PureComponent {
       } else {
         setTimeout(() => this._onSelectionChange(event));
       }
-      onSelectionChange &&
-      onSelectionChange(event);
+      onSelectionChange && onSelectionChange(event);
     };
 
     /**
@@ -230,7 +233,7 @@ export default class extends PureComponent {
      * - 确保 scrollToKeyboardRequest 在 onSelectionChange 之后执行
      * - 短时间内不会重复执行 onContentSizeChange，因为当一次粘贴进许多行文本时，可能会连续触发多次 onContentSizeChange
      */
-    Component.props.onContentSizeChange = debounce(event => {
+    Component.props.onContentSizeChange = debounce((event) => {
       this._onContentSizeChange(event);
       onContentSizeChange && onContentSizeChange(event);
     }, 2);
@@ -239,7 +242,7 @@ export default class extends PureComponent {
   }
 
   _getInputInfo(target) {
-    return this._inputInfoMap[target] = this._inputInfoMap[target] || {};
+    return (this._inputInfoMap[target] = this._inputInfoMap[target] || {});
   }
 
   _measureCursorPosition(text, width, callback) {
@@ -257,16 +260,20 @@ export default class extends PureComponent {
    * 如果不使用防抖函数，那么在 onContentSizeChange 第一次触发时，measureInputVisible 就会被设置为 false，导致无法获取正确的值。
    * 但在模拟器上没有这个问题。
    */
-  _onContentSizeChangeMeasureInput = debounce(event => {
-    if (!this._measureCallback) return;
+  _onContentSizeChangeMeasureInput = debounce((event) => {
+    if (!this._measureCallback) {
+      return;
+    }
     this._measureCallback(event.nativeEvent.contentSize.height);
     this._measureCallback = null;
     this.setState({ measureInputVisible: false });
   }, 3);
 
-  _onRef = root => {
+  _onRef = (root) => {
     const { useAnimatedScrollView } = this.props;
-    if (!root) return;
+    if (!root) {
+      return;
+    }
     this._root = root;
 
     if (useAnimatedScrollView && this._root._component) {
@@ -275,10 +282,12 @@ export default class extends PureComponent {
 
     const getTopOffset = () => {
       this.props.topOffset === undefined &&
-      this._root._innerViewRef &&
-      this._root._innerViewRef.measureInWindow((x, y) => {
-        if (y > 0) this._topOffset = y;
-      });
+        this._root._innerViewRef &&
+        this._root._innerViewRef.measureInWindow((x, y) => {
+          if (y > 0) {
+            this._topOffset = y;
+          }
+        });
     };
 
     setTimeout(getTopOffset);
@@ -287,41 +296,36 @@ export default class extends PureComponent {
   };
 
   _scrollToKeyboardRequest = () => {
-    if (!this._keyboardShow && !this.props.supportHardwareKeyboard) return;
+    if (!this._keyboardShow && !this.props.supportHardwareKeyboard) {
+      return;
+    }
 
     const curFocusTarget = this._curFocus;
-    if (!curFocusTarget) return;
+    if (!curFocusTarget) {
+      return;
+    }
 
     const scrollResponder = this._root && this._root.getScrollResponder();
-    if (!scrollResponder) return;
+    if (!scrollResponder) {
+      return;
+    }
 
-    UIManager.viewIsDescendantOf(
-      curFocusTarget,
-      scrollResponder.getInnerViewNode(),
-      (isAncestor) => {
-        if (!isAncestor) return;
-
-        const { text, selectionEnd, width, height } = this._getInputInfo(curFocusTarget);
-        const cursorAtLastLine = !text ||
-          selectionEnd === undefined ||
-          text.length === selectionEnd;
-
-        if (cursorAtLastLine) {
-          return this._scrollToKeyboard(curFocusTarget, 0);
-        }
-
-        this._measureCursorPosition(
-          text.substr(0, selectionEnd),
-          width,
-          cursorRelativeTopOffset => {
-            this._scrollToKeyboard(
-              curFocusTarget,
-              Math.max(0, height - cursorRelativeTopOffset)
-            );
-          }
-        );
+    UIManager.viewIsDescendantOf(curFocusTarget, scrollResponder.getInnerViewNode(), (isAncestor) => {
+      if (!isAncestor) {
+        return;
       }
-    );
+
+      const { text, selectionEnd, width, height } = this._getInputInfo(curFocusTarget);
+      const cursorAtLastLine = !text || selectionEnd === undefined || text.length === selectionEnd;
+
+      if (cursorAtLastLine) {
+        return this._scrollToKeyboard(curFocusTarget, 0);
+      }
+
+      this._measureCursorPosition(text.substr(0, selectionEnd), width, (cursorRelativeTopOffset) => {
+        this._scrollToKeyboard(curFocusTarget, Math.max(0, height - cursorRelativeTopOffset));
+      });
+    });
   };
 
   _scrollToKeyboard = (target, offset) => {
@@ -332,7 +336,9 @@ export default class extends PureComponent {
   _onKeyboardShow = () => {
     // 在 react-native v0.57 版本中（也可能更早），键盘弹出时，该回调会连续执行3次
     // 导致 scrollResponderScrollNativeHandleToKeyboard 工作不正常
-    if (this._keyboardShow) return;
+    if (this._keyboardShow) {
+      return;
+    }
     this._keyboardShow = true;
     this._scrollToKeyboardRequest();
   };
@@ -344,14 +350,21 @@ export default class extends PureComponent {
   /**
    * 这个方法是为了防止 ScrollView 在滑动结束后触发 TextInput 的 focus 事件
    */
-  _onTouchStart = event => {
+  _onTouchStart = (event) => {
     const target = getTarget(event);
-    if (target === this._curFocus) return false;
+    if (target === this._curFocus) {
+      return false;
+    }
 
     const targetInst = event._targetInst;
-    const uiViewClassName = targetInst.type || // >= react-native 0.49
+    const uiViewClassName =
+      targetInst.type || // >= react-native 0.49
       targetInst.viewConfig.uiViewClassName; // <= react-native 0.48
-    return uiViewClassName === 'RCTTextField' || uiViewClassName === 'RCTTextView' || uiViewClassName === 'RCTMultilineTextInputView';
+    return (
+      uiViewClassName === 'RCTTextField' ||
+      uiViewClassName === 'RCTTextView' ||
+      uiViewClassName === 'RCTMultilineTextInputView'
+    );
   };
 
   /**
@@ -361,7 +374,7 @@ export default class extends PureComponent {
    * onFocus 在 keyboardDidShow 之前触发
    * onFocus 在 keyboardWillShow 之后触发
    */
-  _onFocus = event => {
+  _onFocus = (event) => {
     const target = getTarget(event);
     this._curFocus = target;
 
@@ -383,7 +396,9 @@ export default class extends PureComponent {
         inputInfo.text = props.value || props.defaultValue;
       }
 
-      if (!isIOS) return;
+      if (!isIOS) {
+        return;
+      }
 
       inputInfo.onFocusRequireScroll = true;
       setTimeout(() => {
@@ -394,25 +409,31 @@ export default class extends PureComponent {
         }
       }, 250);
     } else {
-      if (isIOS) this._scrollToKeyboardRequest();
+      if (isIOS) {
+        this._scrollToKeyboardRequest();
+      }
     }
   };
 
-  _onBlur = event => {
+  _onBlur = (event) => {
     const target = getTarget(event);
-    if (this._curFocus === target) this._curFocus = null;
-  }
+    if (this._curFocus === target) {
+      this._curFocus = null;
+    }
+  };
 
   /**
    * onChange 在 onContentSizeChange 之前触发
    * onChange 在 onSelectionChange 之后触发
    */
-  _onChange = event => {
-    if (!event.nativeEvent) return; // Fixed: https://github.com/baijunjie/react-native-input-scroll-view/issues/44
+  _onChange = (event) => {
+    if (!event.nativeEvent) {
+      return;
+    } // Fixed: https://github.com/baijunjie/react-native-input-scroll-view/issues/44
     const target = getTarget(event);
     const inputInfo = this._getInputInfo(target);
     inputInfo.text = event.nativeEvent.text;
-  }
+  };
 
   /**
    * onSelectionChange 在 keyboardDidShow 之前触发
@@ -424,7 +445,7 @@ export default class extends PureComponent {
    * 这将导致最终调整位置不正确
    * 因此，这里需要使用防抖函数来避开回调连续的执行
    */
-  _onSelectionChange = debounce(event => {
+  _onSelectionChange = debounce((event) => {
     const target = getTarget(event);
     const inputInfo = this._getInputInfo(target);
 
@@ -434,7 +455,9 @@ export default class extends PureComponent {
       inputInfo.text = getProps(event._targetInst).value;
     }
 
-    if (!isIOS) return;
+    if (!isIOS) {
+      return;
+    }
 
     if (inputInfo.onFocusRequireScroll) {
       inputInfo.onFocusRequireScroll = false;
@@ -442,8 +465,10 @@ export default class extends PureComponent {
     }
   }, 1);
 
-  _onContentSizeChange = event => {
-    if (!event.nativeEvent) return; // Fixed: https://github.com/baijunjie/react-native-input-scroll-view/issues/42
+  _onContentSizeChange = (event) => {
+    if (!event.nativeEvent) {
+      return;
+    } // Fixed: https://github.com/baijunjie/react-native-input-scroll-view/issues/42
     const target = getTarget(event);
     const inputInfo = this._getInputInfo(target);
     inputInfo.width = event.nativeEvent.contentSize.width;
@@ -455,38 +480,41 @@ export default class extends PureComponent {
   };
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function focus(targetTag) {
   if (isIOS) {
     UIManager.focus(targetTag);
     // 在 react-native v0.57 版本中（也可能更早），UIManager.focus 不再有效
     TextInput.State && TextInput.State.focusTextInput(targetTag);
   } else {
-    const AndroidTextInput = UIManager.getViewManagerConfig
-      && UIManager.getViewManagerConfig('AndroidTextInput')
-      || UIManager.AndroidTextInput;
-    UIManager.dispatchViewManagerCommand(
-      targetTag,
-      AndroidTextInput.Commands.focusTextInput,
-      null,
-    );
+    const AndroidTextInput =
+      (UIManager.getViewManagerConfig && UIManager.getViewManagerConfig('AndroidTextInput')) ||
+      UIManager.AndroidTextInput;
+    UIManager.dispatchViewManagerCommand(targetTag, AndroidTextInput.Commands.focusTextInput, null);
   }
 }
 
 function getTarget(event) {
-  return event.nativeEvent.target || // on >= 0.63 target tag can be found on nativeEvent not sure in other versions
+  return (
+    event.nativeEvent.target || // on >= 0.63 target tag can be found on nativeEvent not sure in other versions
     event.target ||
     event.currentTarget ||
-    event._targetInst.stateNode._nativeTag; // for Android
+    event._targetInst.stateNode._nativeTag
+  ); // for Android
 }
 
 function getProps(targetNode) {
-  return targetNode.memoizedProps || // >= react-native 0.49
-    targetNode._currentElement.props; // <= react-native 0.48
+  return (
+    targetNode.memoizedProps || // >= react-native 0.49
+    targetNode._currentElement.props
+  ); // <= react-native 0.48
 }
 
 const styles = StyleSheet.create({
   wrap: {
     height: '100%',
+    flexGrow: 1,
+    flexShrink: 0,
   },
 
   hidden: {
