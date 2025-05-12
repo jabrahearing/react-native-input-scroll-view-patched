@@ -143,6 +143,8 @@ _onContentSizeChange = ({nativeEvent:event}) => {
 "react-native": ">=0.46.0"
 ```
 
+## TESTING
+Note there was a package.json file in the __test__ folder. Due to lack of time it was removed because it had security issues with the dependencies.
 
 
 ## Product case
